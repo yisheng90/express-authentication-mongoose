@@ -1,116 +1,103 @@
 var expect = require('chai').expect;
-var db = require('../models');
+var mongoose = require('mongoose')
+var User = require('../models/user')
 
 before(function(done) {
-  db.sequelize.sync({ force: true }).then(function() {
-    done();
-  });
+  // ensure our database is empty - waiting till next tick ensures the connection is ready
+  setTimeout(function(){ mongoose.connection.db.dropDatabase(done) }, 0)
 });
 
 describe('Creating a User', function() {
   it('should create successfully', function(done) {
-    db.user.create({
+    User.create({
       email: 'test@test.co',
       name: 'Brian',
       password: 'password'
-    }).then(function() {
-      done();
-    }).catch(function(error) {
-      done(error);
-    });
+    }, function(err, user) {
+      done(err);
+    })
   });
 
-  it('should throw an error on invalid email addresses', function(done) {
-    db.user.create({
+  it('should give an error on invalid email addresses', function(done) {
+    User.create({
       email: 'test',
       name: 'Brian',
       password: 'password'
-    }).then(function(newUser) {
-      done(newUser);
-    }).catch(function(error) {
-      done();
-    });
+    }, function(err, user) {
+      // there should be an error
+      done(!err);
+    })
   });
 
-  it('should throw an error on invalid name', function(done) {
-    db.user.create({
+  it('should give an error on invalid name', function(done) {
+    User.create({
       email: 'test@test.co',
       name: '',
       password: 'password'
-    }).then(function(newUser) {
-      done(newUser);
-    }).catch(function(error) {
-      done();
-    });
+    }, function(err, user) {
+      // there should be an error
+      done(!err);
+    })
   });
 
-  it('should throw an error on invalid password', function(done) {
-    db.user.create({
+  it('should give an error on invalid password', function(done) {
+    User.create({
       email: 'test@test.co',
       name: 'Brian',
       password: 'short'
-    }).then(function(newUser) {
-      done(newUser);
-    }).catch(function(error) {
-      done();
-    });
+    }, function(err, user) {
+      // there should be an error
+      done(!err);
+    })
   });
 
   it('should hash the password before save', function(done) {
-    db.user.create({
+    User.create({
       email: 'test@test.co',
       name: 'Brian',
       password: 'password'
-    }).then(function(newUser) {
+    }, function(err, newUser) {
       if (newUser.password === 'password') {
         done(newUser);
       } else {
-        done();
+        done(err);
       }
-    }).catch(function(error) {
-      done(error);
-    });
+    })
   });
 });
 
 describe('User instance methods', function() {
   describe('validPassword', function() {
     it('should validate a correct password', function(done) {
-      db.user.findOne().then(function(user) {
+      User.findOne().then(function(err, user) {
         if (user.validPassword('password')) {
-          done();
+          done(err);
         } else {
           done(user);
         }
-      }).catch(function(error) {
-        done(error);
-      });
+      })
     });
 
     it('should invalidate an incorrect password', function(done) {
-      db.user.findOne().then(function(user) {
+      User.findOne().then(function(user) {
         if (!user.validPassword('nope')) {
-          done();
+          done(err);
         } else {
           done(user);
         }
-      }).catch(function(error) {
-        done(error);
-      });
+      })
     });
   });
 
   describe('toJSON', function() {
     it('should return a user without a password field', function(done) {
-      db.user.findOne().then(function(user) {
+      User.findOne().then(function(user) {
         if (user.toJSON().password === undefined) {
           done();
         } else {
           done(user);
         }
-      }).catch(function(error) {
-        done(error);
-      });
+      })
     });
   });
 });

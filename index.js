@@ -1,7 +1,10 @@
 var express = require('express');
 var ejsLayouts = require('express-ejs-layouts');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose')
 var app = express();
+
+mongoose.connect('mongodb://localhost/express-authentication')
 
 app.set('view engine', 'ejs');
 

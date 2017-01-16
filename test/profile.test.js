@@ -1,13 +1,12 @@
 var expect = require('chai').expect;
 var request = require('supertest');
 var app = require('../index');
-var db = require('../models');
+var mongoose = require('mongoose')
 var agent = request.agent(app);
 
 before(function(done) {
-  db.sequelize.sync({ force: true }).then(function() {
-    done();
-  });
+  // ensure our database is empty - waiting till next tick ensures the connection is ready
+  setTimeout(function(){ mongoose.connection.db.dropDatabase(done) }, 0)
 });
 
 describe('GET /profile', function() {
