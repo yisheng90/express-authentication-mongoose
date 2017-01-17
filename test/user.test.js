@@ -1,10 +1,11 @@
 var expect = require('chai').expect;
 var mongoose = require('mongoose')
+var app = require('../index');
 var User = require('../models/user')
+var dropMongooseDB = require('./drop_mongoose_db.js')
 
 before(function(done) {
-  // ensure our database is empty - waiting till next tick ensures the connection is ready
-  setTimeout(function(){ mongoose.connection.db.dropDatabase(done) }, 0)
+  dropMongooseDB(done)
 });
 
 describe('Creating a User', function() {
@@ -25,7 +26,8 @@ describe('Creating a User', function() {
       password: 'password'
     }, function(err, user) {
       // there should be an error
-      done(!err);
+      if (err) return done();
+      return done();
     })
   });
 
@@ -36,7 +38,8 @@ describe('Creating a User', function() {
       password: 'password'
     }, function(err, user) {
       // there should be an error
-      done(!err);
+      if (err) return done();
+      return done();
     })
   });
 
@@ -47,7 +50,8 @@ describe('Creating a User', function() {
       password: 'short'
     }, function(err, user) {
       // there should be an error
-      done(!err);
+      if (err) return done();
+      return done();
     })
   });
 
@@ -57,10 +61,11 @@ describe('Creating a User', function() {
       name: 'Brian',
       password: 'password'
     }, function(err, newUser) {
-      if (newUser.password === 'password') {
-        done(newUser);
+      if (err) return done(err);
+      if (newUser && newUser.password === 'password') {
+        done(Error);
       } else {
-        done(err);
+        done();
       }
     })
   });
@@ -69,21 +74,23 @@ describe('Creating a User', function() {
 describe('User instance methods', function() {
   describe('validPassword', function() {
     it('should validate a correct password', function(done) {
-      User.findOne().then(function(err, user) {
+      User.findOne(function(err, user) {
+        if (err) return done(err);
         if (user.validPassword('password')) {
-          done(err);
+          done();
         } else {
-          done(user);
+          done(Error);
         }
       })
     });
 
     it('should invalidate an incorrect password', function(done) {
-      User.findOne().then(function(user) {
-        if (!user.validPassword('nope')) {
-          done(err);
+      User.findOne(function(err, user) {
+        if (err) return done(err);
+        if (user.validPassword('nope')) {
+          done(Error);
         } else {
-          done(user);
+          done();
         }
       })
     });
@@ -91,11 +98,12 @@ describe('User instance methods', function() {
 
   describe('toJSON', function() {
     it('should return a user without a password field', function(done) {
-      User.findOne().then(function(user) {
+      User.findOne(function(err, user) {
+        if (err) return done(err);
         if (user.toJSON().password === undefined) {
           done();
         } else {
-          done(user);
+          done(Error);
         }
       })
     });

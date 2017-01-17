@@ -3,10 +3,10 @@ var request = require('supertest');
 var app = require('../index');
 var mongoose = require('mongoose')
 var agent = request.agent(app);
+var dropMongooseDB = require('./drop_mongoose_db.js')
 
 before(function(done) {
-  // ensure our database is empty - waiting till next tick ensures the connection is ready
-  setTimeout(function(){ mongoose.connection.db.dropDatabase(done) }, 0)
+  dropMongooseDB(done)
 });
 
 describe('GET /profile', function() {

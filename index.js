@@ -4,7 +4,11 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose')
 var app = express();
 
-mongoose.connect('mongodb://localhost/express-authentication')
+if (process.env.NODE_ENV === "test") {
+  mongoose.connect('mongodb://localhost/express-authentication')
+} else {
+  mongoose.connect('mongodb://localhost/express-authentication-test')
+}
 
 app.set('view engine', 'ejs');
 
